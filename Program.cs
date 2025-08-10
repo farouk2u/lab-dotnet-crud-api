@@ -20,15 +20,17 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.UseExceptionHandler("/error-development");
 }
 else
 {
     app.UseExceptionHandler("/error");
 }
 
-// Add our custom request logging middleware
+// Add request logging middleware
 app.UseRequestLogging();
+
+// Add API key authentication middleware
+app.UseApiKeyAuth();
 
 app.UseHttpsRedirection();
 app.MapControllers();

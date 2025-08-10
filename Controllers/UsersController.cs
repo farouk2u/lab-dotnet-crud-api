@@ -9,15 +9,20 @@ namespace dotnet_crud_api.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
+        private readonly ILogger<UsersController> _logger;
 
-        public UsersController(IUserRepository userRepository)
+        public UsersController(IUserRepository userRepository, ILogger<UsersController> logger)
         {
             _userRepository = userRepository;
+            _logger = logger;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
+            // Log the authenticated user
+            _logger.LogInformation("User {User} accessing all users", User.Identity?.Name ?? "unknown");
+            
             var users = await _userRepository.GetAllAsync();
             return Ok(users);
         }
@@ -36,6 +41,7 @@ namespace dotnet_crud_api.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> CreateUser(User user)
         {
+            _logger.LogInformation("User {User} creating a new user", User.Identity?.Name ?? "unknown");
             var createdUser = await _userRepository.CreateAsync(user);
             return CreatedAtAction(nameof(GetUser), new { id = createdUser.Id }, createdUser);
         }
@@ -61,6 +67,9 @@ namespace dotnet_crud_api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
+            _logger.LogInformation("User {User} deleting user with id {UserId}", 
+                User.Identity?.Name ?? "unknown", id);
+                
             var user = await _userRepository.GetByIdAsync(id);
             if (user == null)
             {
